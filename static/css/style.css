@@ -21,25 +21,31 @@
 
 /* ================= BASIC SETUP ================= */
 body {
-    font-family: 'Sarabun', sans-serif;
     margin: 0; padding: 0;
     background-color: var(--bg-color);
     color: var(--text-main);
-    overflow-x: hidden;
+    font-family: 'Sarabun', sans-serif;
+    overflow: hidden; /* ล็อกไว้ก่อน จนกว่า Intro จะจบ */
 }
 
 .hidden { display: none !important; }
 
-/* ================= INTRO ================= */
+/* ================= 1. INTRO SECTION (แก้ไขแล้ว) ================= */
 #intro-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background-color: var(--bg-color);
-    z-index: 9999;
+    z-index: 9999; /* อยู่บนสุด บังทุกอย่าง */
     display: flex; justify-content: center; align-items: center;
-    transition: transform 0.8s ease-in-out;
+    transition: transform 1.2s cubic-bezier(0.77, 0, 0.175, 1); /* เอฟเฟกต์เลื่อนขึ้น */
 }
-.curtain-open { transform: translateY(-100%); }
+
+/* คลาสสำหรับสั่งให้ Intro เลื่อนขึ้นไปข้างบน */
+.slide-up {
+    transform: translateY(-100%) !important;
+}
+
 #animCanvas { position: absolute; top: 0; left: 0; }
+
 .skip-hint {
     position: absolute; bottom: 50px; color: var(--text-muted);
     font-family: 'Prompt', sans-serif; font-size: 20px; font-weight: 600;
@@ -47,12 +53,21 @@ body {
 }
 @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
 
-/* ================= MAIN LAYOUT ================= */
+/* ================= 2. MAIN LAYOUT (แก้ไขแล้ว) ================= */
 #main-site {
-    position: relative; z-index: 1; min-height: 100vh;
-    opacity: 0; transition: opacity 0.8s ease;
+    position: relative; z-index: 1;
+    min-height: 100vh;
+    opacity: 0; /* ซ่อนไว้ก่อน */
+    transition: opacity 1s ease 0.5s; /* รอ 0.5วิ ค่อยโผล่มา */
+    overflow-y: hidden;
 }
-.site-visible { opacity: 1 !important; }
+
+/* คลาสสำหรับสั่งให้หน้าเว็บโผล่ออกมา */
+.show-content {
+    opacity: 1 !important;
+    overflow-y: auto !important;
+}
+
 .reveal-element { opacity: 0; transform: translateY(30px); transition: all 0.8s ease; }
 .reveal-active { opacity: 1; transform: translateY(0); }
 
@@ -76,12 +91,11 @@ nav {
 .hero h1 span { background: var(--gradient-text); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 .hero p { color: var(--text-muted); font-size: 20px; font-weight: 300; margin-top: 15px; }
 
-/* ================= GALLERY & CARDS ================= */
-.container { max-width: 1200px; margin: 0 auto; padding: 0 20px 100px; }
+/* ================= TOP ARTISTS ================= */
 .section-header { text-align: center; margin: 40px 0 30px; }
 .section-title { font-family: 'Prompt'; font-size: 24px; font-weight: 700; }
-
 .top-grid { display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; margin-bottom: 50px; }
+
 .artist-rank-card {
     background: var(--card-bg); padding: 20px; border-radius: 20px; width: 220px;
     position: relative; display: flex; flex-direction: column; align-items: center;
@@ -91,7 +105,10 @@ nav {
 .artist-img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 10px; border: 3px solid var(--card-bg); }
 .rank-badge { position: absolute; top: -15px; background: var(--gold); color: #000; width: 35px; height: 35px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; font-family: 'Prompt'; }
 
+/* ================= GALLERY & CARDS ================= */
+.container { max-width: 1200px; margin: 0 auto; padding: 0 20px 100px; }
 .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 30px; }
+
 .art-card {
     background: var(--card-bg); border-radius: 16px; overflow: hidden;
     position: relative; border: 1px solid rgba(255,255,255,0.05); transition: 0.3s;
@@ -100,6 +117,15 @@ nav {
 .card-img-container { position: relative; height: 280px; overflow: hidden; cursor: pointer; }
 .card-img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s; }
 .art-card:hover .card-img { transform: scale(1.05); }
+
+.card-overlay {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5); opacity: 0; transition: 0.3s;
+    display: flex; justify-content: center; align-items: center;
+}
+.card-img-container:hover .card-overlay { opacity: 1; }
+.view-btn { background: white; color: black; padding: 10px 20px; border-radius: 30px; font-weight: bold; font-size: 14px; }
+
 .card-body { padding: 20px; }
 .card-title { font-family: 'Prompt'; font-weight: 600; margin: 0 0 5px 0; }
 .card-price { font-family: 'Prompt'; font-weight: 700; color: var(--accent); font-size: 18px; margin-top: 10px; }
@@ -140,9 +166,6 @@ nav {
 .filter-btn.active, .filter-btn:hover { background: var(--text-main); color: #000; }
 
 .reset-btn-float { position: fixed; bottom: 20px; right: 20px; background: var(--danger); color: white; border: none; padding: 12px 20px; border-radius: 50px; cursor: pointer; z-index: 7000; font-family: 'Prompt'; font-weight: bold; }
-.card-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); opacity: 0; transition: 0.3s; display: flex; justify-content: center; align-items: center; }
-.card-img-container:hover .card-overlay { opacity: 1; }
-.view-btn { background: white; color: black; padding: 10px 20px; border-radius: 30px; font-weight: bold; font-size: 14px; }
 .studio-tabs { display: flex; gap: 15px; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px; }
 .studio-tab { cursor: pointer; font-family: 'Prompt'; font-weight: bold; color: #666; }
 .studio-tab.active { color: var(--accent); border-bottom: 3px solid var(--accent); }

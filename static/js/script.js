@@ -1,13 +1,16 @@
-// ================= 1. INTRO ANIMATION =================
+// ================= 1. INTRO ANIMATION & TRANSITION =================
 const canvas = document.getElementById('animCanvas');
 const ctx = canvas.getContext('2d');
 const introOverlay = document.getElementById('intro-overlay');
 const mainSite = document.getElementById('main-site');
 let animId;
+let isEntered = false;
 
+// ตั้งค่า Canvas
 function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
 window.addEventListener('resize', resize); resize();
 
+// ตั้งค่าลูกบอล
 const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
 const colors = ['#ff7675', '#74b9ff', '#55efc4', '#ffeaa7', '#a29bfe', '#fd79a8', '#fab1a0', '#81ecec'];
 let balls = [], particles = [], phase = 'rolling', frameCount = 0;
@@ -28,58 +31,73 @@ function createExplosion() {
 function animate() {
     if (phase === 'finished') return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // ระยะหมุน
     if (phase === 'rolling') {
         frameCount++;
         balls.forEach(b => {
             b.x += b.vx; b.y += b.vy;
             ctx.beginPath(); ctx.arc(b.x, b.y, 85, 0, Math.PI * 2); ctx.fillStyle = b.color; ctx.fill();
         });
-        if (frameCount >= 120) { phase = 'expanding'; try{document.querySelector('.skip-hint').style.opacity = '0';}catch(e){} createExplosion(); }
+        if (frameCount >= 120) { 
+            phase = 'expanding'; 
+            try{ document.querySelector('.skip-hint').style.opacity = '0'; }catch(e){} 
+            createExplosion(); 
+        }
     }
+    
+    // ระยะระเบิด
     if (phase === 'expanding') {
         particles.forEach(p => {
             p.x += p.vx; p.y += p.vy; p.vx *= 0.94; p.vy *= 0.94; p.radius += p.growthRate * 2; p.growthRate *= 1.03; 
             ctx.beginPath(); ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2); ctx.fillStyle = p.color; ctx.fill();
         });
+        // ถ้าระเบิดเต็มจอ ให้เข้าเว็บอัตโนมัติ
         if (particles[0].radius > Math.max(window.innerWidth, window.innerHeight)) { enterSite(); return; }
     }
     animId = requestAnimationFrame(animate);
 }
-// --- วางท่อนนี้ลงไปแทน ---
-// เช็คว่าเคยดู Intro หรือยัง? (ถ้ามีค่าใน sessionStorage แปลว่าเคยดูแล้ว)
-if (sessionStorage.getItem('introShown')) {
-    // ⏩ เคยดูแล้ว: สั่งปิด Intro ทันที
-    introOverlay.style.display = 'none';
-    mainSite.style.visibility = 'visible';
-    mainSite.style.opacity = '1';
-    document.body.style.overflowY = 'auto';
-    // สั่งให้พวก element ต่างๆ ลอยขึ้นมาเลย
-    document.querySelectorAll('.reveal-element').forEach(el => el.classList.add('reveal-active'));
-} else {
-    // ▶️ ยังไม่เคยดู: ให้เล่น Animation ตามปกติ
-    animate();
-    setTimeout(() => { if (!isEntered) enterSite(); }, 4000); 
-}
 
-let isEntered = false;
+// ฟังก์ชันหลัก: เปิดม่านเข้าสู่หน้าเว็บ
 function enterSite() {
     if (isEntered) return;
-    isEntered = true; 
-    phase = 'finished'; 
-    if(animId) cancelAnimationFrame(animId);
-    sessionStorage.setItem('introShown', 'true');
-    introOverlay.style.transform = "translateY(-100%)"; // FIX: Force CSS
-    mainSite.style.visibility = 'visible'; 
-    mainSite.style.opacity = '1';
-    document.body.style.overflowY = 'auto'; 
-    
-    document.querySelectorAll('.reveal-element').forEach((el, index) => { setTimeout(() => { el.classList.add('reveal-active'); }, 300 + (index * 150)); });
-    setTimeout(() => { introOverlay.style.display = 'none'; }, 1500);
-}
-document.addEventListener('keydown', (e) => { if (e.code === 'Space') enterSite(); });
-document.getElementById('intro-overlay').addEventListener('click', enterSite); // FIX: Click to enter
+    isEntered = true;
+    phase = 'finished';
 
-// ================= SYSTEM LOGIC =================
+    // 1. หยุด Animation
+    if (typeof animId !== 'undefined') cancelAnimationFrame(animId);
+
+    // 2. จำค่าว่าดูแล้ว
+    sessionStorage.setItem('introShown', 'true');
+
+    // 3. สั่ง CSS ให้เลื่อน Intro ขึ้น และโชว์หน้าเว็บ
+    introOverlay.classList.add('slide-up');
+    mainSite.classList.add('show-content');
+    document.body.style.overflowY = 'auto'; // ปลดล็อก Scroll
+
+    // 4. ซ่อน Overlay ถาวรเมื่ออนิเมชั่นจบ
+    setTimeout(() => {
+        introOverlay.style.display = 'none';
+    }, 1500);
+}
+
+// เช็คว่าเคยดู Intro หรือยัง?
+if (sessionStorage.getItem('introShown')) {
+    // ถ้าเคยดูแล้ว: ซ่อน Intro ทันที โชว์เว็บเลย
+    introOverlay.style.display = 'none';
+    mainSite.classList.add('show-content');
+    document.body.style.overflowY = 'auto';
+    document.querySelectorAll('.reveal-element').forEach(el => el.classList.add('reveal-active'));
+} else {
+    // ถ้ายัง: เล่น Animation
+    animate();
+    // ดักปุ่ม Spacebar และ คลิก
+    document.addEventListener('keydown', (e) => { if (e.code === 'Space') enterSite(); });
+    introOverlay.addEventListener('click', enterSite);
+}
+
+
+// ================= 2. SYSTEM LOGIC (Database / Auth / Upload) =================
 let currentUser = null; 
 let artworks = [];
 
@@ -99,7 +117,7 @@ async function initSystem() {
     } catch(e) { console.error(e); renderGallery([]); }
 }
 
-// Auth
+// --- Authentication ---
 async function handleRegister(e) {
     e.preventDefault();
     const name = document.getElementById('regName').value;
@@ -134,8 +152,7 @@ function updateUI() {
 
 function logout() { if(confirm('ออกจากระบบ?')) { currentUser = null; sessionStorage.removeItem('as_user'); location.reload(); } }
 
-// Upload & Buy
-// ค้นหาฟังก์ชัน handleUpload แล้วเอาโค้ดนี้ไปทับเลยครับ
+// --- Upload System ---
 async function handleUpload(e) {
     e.preventDefault();
     const formData = new FormData();
@@ -150,17 +167,12 @@ async function handleUpload(e) {
     
     if(data.success) {
         alert('ลงผลงานสำเร็จ!');
-        
-        // ❌ ของเก่า: location.reload(); (ลบบรรทัดนี้ทิ้ง หรือใส่ // ข้างหน้า)
-        
-        // ✅ ของใหม่: ล้างฟอร์มและโหลดรูปใหม่โดยไม่ต้องรีเฟรชหน้า
-        document.getElementById('upload-form').reset(); // ล้างช่องกรอกข้อมูล
-        
-        // เรียก initSystem() เพื่อดึงรูปใหม่มาแสดงทันที
-        initSystem(); 
+        document.getElementById('upload-form').reset();
+        initSystem(); // โหลดรูปใหม่ทันทีโดยไม่รีเฟรชหน้า
     }
 }
 
+// --- Preview & Buy ---
 let selectedItemForPay = null;
 function openPreview(id) {
     const item = artworks.find(a => a.id === id); if(!item) return; selectedItemForPay = item;
@@ -197,9 +209,10 @@ async function confirmPayment(e) {
     if(data.success) { closeModal('payment-modal'); document.getElementById('success-modal').classList.add('open'); initSystem(); }
 }
 
-// Edit & Delete
+// --- Edit & Delete & Helpers ---
 async function deleteArt(id, event) { event.stopPropagation(); if(confirm('ลบผลงานนี้?')) { await fetch('/api/delete_art', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) }); location.reload(); } }
 function openEditModal(id, event) { event.stopPropagation(); const item = artworks.find(a => a.id === id); document.getElementById('edit-id').value = item.id; document.getElementById('edit-price').value = item.price; document.getElementById('edit-caption').value = item.caption; document.getElementById('edit-modal').classList.add('open'); }
+
 async function confirmEdit(e) {
     e.preventDefault();
     await fetch('/api/edit', {
@@ -213,6 +226,7 @@ async function confirmEdit(e) {
     });
     location.reload();
 }
+
 async function deleteAccount() { if(confirm('ยืนยันลบบัญชี?')) { await fetch('/api/delete_account', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: currentUser.email }) }); logout_no_confirm(); } }
 async function systemReset() { if(confirm('รีเซ็ตระบบทั้งหมด?')) { await fetch('/api/reset', { method: 'POST' }); logout_no_confirm(); } }
 function logout_no_confirm() { sessionStorage.removeItem('as_user'); location.reload(); }
@@ -220,9 +234,7 @@ function closeModal(id) { document.getElementById(id).classList.remove('open'); 
 function openAuthModal(mode='login') { document.getElementById('auth-modal').classList.add('open'); document.getElementById('login-section').classList.toggle('hidden', mode === 'register'); document.getElementById('register-section').classList.toggle('hidden', mode !== 'register'); }
 function toggleAuth(mode) { openAuthModal(mode); }
 
-// Render Logic
-// ค้นหาฟังก์ชัน renderGallery แล้วทับด้วยอันนี้
-// ก๊อปไปทับฟังก์ชัน renderGallery เดิมได้เลย
+// --- Render Logic ---
 function renderGallery(items) {
     const grid = document.getElementById('gallery');
     
@@ -232,38 +244,26 @@ function renderGallery(items) {
     }
 
     grid.innerHTML = items.map(item => {
-        // เช็คสิทธิ์
         const isOwned = currentUser && item.owner === currentUser.name;
         const isArtist = currentUser && item.artist === currentUser.name;
         const isAdmin = currentUser && currentUser.role === 'admin';
         
-        // --- LOGIC ปุ่มกด (แก้ไขใหม่) ---
         let btns = '';
-        
-        // ถ้าเป็นคนวาด หรือ Admin ถึงจะมีสิทธิ์เห็นปุ่ม
         if (isArtist || isAdmin) {
             if (item.isSold) {
-                // กรณีขายแล้ว: ห้ามแก้ไข! (โชว์แค่ปุ่มลบ เฉพาะ Admin หรือเจ้าของที่อยากลบประวัติ)
-                // แต่ปกติสินค้าขายแล้วไม่ควรลบ เพื่อเก็บประวัติ (แต่ใส่ไว้เผื่อ Admin)
                 if (isAdmin) {
-                    btns = `<div class="action-btn-group">
-                                <button class="action-btn btn-delete" onclick="deleteArt(${item.id}, event)" title="ลบผลงาน"><i class="fas fa-trash"></i></button>
-                            </div>`;
+                    btns = `<div class="action-btn-group"><button class="action-btn btn-delete" onclick="deleteArt(${item.id}, event)" title="ลบผลงาน"><i class="fas fa-trash"></i></button></div>`;
                 }
             } else {
-                // กรณีขายไม่ออก: แก้ไขได้ ลบได้ ปกติ
                 btns = `<div class="action-btn-group">
                             <button class="action-btn btn-edit" onclick="openEditModal(${item.id}, event)" title="แก้ไข"><i class="fas fa-pencil-alt"></i></button>
                             <button class="action-btn btn-delete" onclick="deleteArt(${item.id}, event)" title="ลบผลงาน"><i class="fas fa-trash"></i></button>
                         </div>`;
             }
         }
-        // --------------------------------
 
-        // Logic การแสดงป้าย
         let soldOverlay = '';
         let soldClass = '';
-
         if (item.isSold) {
             if (isOwned) {
                 soldClass = ''; 
@@ -291,40 +291,21 @@ function renderGallery(items) {
     }).join('');
 }
 
-// ฟังก์ชันจัดอันดับศิลปิน (ฉบับปรับปรุง: รวมยอดขายตามชื่อ)
 function renderTopArtists() {
-    // 1. สร้าง Dictionary เก็บข้อมูลศิลปิน
-    // รูปแบบ: { "ชื่อศิลปิน": { sales: 10, img: "url..." } }
     const artistStats = {};
-
     artworks.forEach(art => {
-        // นับเฉพาะชิ้นที่ขายแล้ว
         if (art.isSold) {
             if (!artistStats[art.artist]) {
-                // ถ้ายังไม่มีชื่อนี้ ให้เริ่มนับใหม่
-                artistStats[art.artist] = {
-                    name: art.artist,
-                    sales: 0,
-                    img: art.img // รูปโปรไฟล์ ใช้รูปจากงานล่าสุดของเขา
-                };
+                artistStats[art.artist] = { name: art.artist, sales: 0, img: art.img };
             }
-            // บวกยอดขายเพิ่ม
             artistStats[art.artist].sales += 1;
         }
     });
 
-    // 2. แปลงเป็น Array แล้วเรียงลำดับตามยอดขาย (มาก -> น้อย)
-    const sortedArtists = Object.values(artistStats)
-        .sort((a, b) => b.sales - a.sales)
-        .slice(0, 3); // เอาแค่ 3 อันดับแรก
-
-    // 3. แสดงผลหน้าเว็บ
+    const sortedArtists = Object.values(artistStats).sort((a, b) => b.sales - a.sales).slice(0, 3);
     const grid = document.getElementById('top-artists-grid');
     
-    if (sortedArtists.length === 0) {
-        grid.innerHTML = '<div style="color:#666; width:100%; text-align:center;">ยังไม่มีการซื้อขาย</div>';
-        return;
-    }
+    if (sortedArtists.length === 0) { grid.innerHTML = '<div style="color:#666; width:100%; text-align:center;">ยังไม่มีการซื้อขาย</div>'; return; }
 
     grid.innerHTML = sortedArtists.map((artist, index) => `
         <div class="artist-rank-card">

@@ -11,8 +11,12 @@
 
     <div id="intro-overlay">
         <canvas id="animCanvas"></canvas>
-        <div class="skip-hint">กด Spacebar หรือ คลิก เพื่อเข้าสู่เว็บไซต์</div>
+        <div class="skip-hint">กด Spacebar เพื่อเข้าสู่เว็บไซต์</div>
     </div>
+    <div id="main-site">
+        </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 
     <button id="admin-reset-btn" class="reset-btn-float hidden" onclick="systemReset()">
         <i class="fas fa-sync-alt"></i> รีเซ็ตระบบ
