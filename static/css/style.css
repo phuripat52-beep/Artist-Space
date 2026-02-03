@@ -1,0 +1,157 @@
+@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;700&family=Prompt:wght@400;600;700;800&display=swap');
+
+/* ================= THEME & COLORS ================= */
+:root {
+    --bg-color: #0f0f12;
+    --card-bg: #1a1a1f;
+    --text-main: #ffffff;
+    --text-muted: #a0a0b0;
+    --accent: #6c5ce7;
+    --accent-hover: #5849be;
+    --gradient-text: linear-gradient(135deg, #a55eea 0%, #45aaf2 100%);
+    --gradient-btn: linear-gradient(90deg, #6c5ce7, #a55eea);
+    --danger: #ff4757;
+    --warning: #f1c40f;
+    --success: #2ed573;
+    --download: #00b894;
+    --gold: #ffa502;
+    --glass: rgba(26, 26, 31, 0.95);
+    --shadow-md: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+/* ================= BASIC SETUP ================= */
+body {
+    font-family: 'Sarabun', sans-serif;
+    margin: 0; padding: 0;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    overflow-x: hidden;
+}
+
+.hidden { display: none !important; }
+
+/* ================= INTRO ================= */
+#intro-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background-color: var(--bg-color);
+    z-index: 9999;
+    display: flex; justify-content: center; align-items: center;
+    transition: transform 0.8s ease-in-out;
+}
+.curtain-open { transform: translateY(-100%); }
+#animCanvas { position: absolute; top: 0; left: 0; }
+.skip-hint {
+    position: absolute; bottom: 50px; color: var(--text-muted);
+    font-family: 'Prompt', sans-serif; font-size: 20px; font-weight: 600;
+    animation: pulse 2s infinite; pointer-events: none; z-index: 10000;
+}
+@keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+
+/* ================= MAIN LAYOUT ================= */
+#main-site {
+    position: relative; z-index: 1; min-height: 100vh;
+    opacity: 0; transition: opacity 0.8s ease;
+}
+.site-visible { opacity: 1 !important; }
+.reveal-element { opacity: 0; transform: translateY(30px); transition: all 0.8s ease; }
+.reveal-active { opacity: 1; transform: translateY(0); }
+
+/* ================= NAVBAR ================= */
+nav {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--glass); backdrop-filter: blur(12px);
+    padding: 15px 40px; display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.logo { font-family: 'Prompt', sans-serif; font-size: 26px; font-weight: 800; color: var(--text-main); display: flex; gap: 10px; cursor: pointer; }
+.logo span { background: var(--gradient-text); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.search-bar input { width: 350px; padding: 12px 25px; border-radius: 50px; border: 1px solid #333; background: #25252b; color: white; outline: none; }
+.btn-nav { background: transparent; border: none; padding: 8px 16px; color: var(--text-muted); cursor: pointer; font-family: 'Prompt'; font-weight: 600; transition: 0.2s; }
+.btn-nav:hover { color: white; }
+.btn-primary { background: var(--gradient-btn); color: white !important; border-radius: 12px; }
+
+/* ================= HERO ================= */
+.hero { text-align: center; padding: 80px 20px 40px; }
+.hero h1 { font-family: 'Prompt'; font-size: 64px; margin-bottom: 10px; font-weight: 800; line-height: 1.1; }
+.hero h1 span { background: var(--gradient-text); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.hero p { color: var(--text-muted); font-size: 20px; font-weight: 300; margin-top: 15px; }
+
+/* ================= GALLERY & CARDS ================= */
+.container { max-width: 1200px; margin: 0 auto; padding: 0 20px 100px; }
+.section-header { text-align: center; margin: 40px 0 30px; }
+.section-title { font-family: 'Prompt'; font-size: 24px; font-weight: 700; }
+
+.top-grid { display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; margin-bottom: 50px; }
+.artist-rank-card {
+    background: var(--card-bg); padding: 20px; border-radius: 20px; width: 220px;
+    position: relative; display: flex; flex-direction: column; align-items: center;
+    border: 1px solid rgba(255,255,255,0.05); transition: 0.3s;
+}
+.artist-rank-card:hover { transform: translateY(-10px); border-color: var(--accent); }
+.artist-img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 10px; border: 3px solid var(--card-bg); }
+.rank-badge { position: absolute; top: -15px; background: var(--gold); color: #000; width: 35px; height: 35px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; font-family: 'Prompt'; }
+
+.gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 30px; }
+.art-card {
+    background: var(--card-bg); border-radius: 16px; overflow: hidden;
+    position: relative; border: 1px solid rgba(255,255,255,0.05); transition: 0.3s;
+}
+.art-card:hover { transform: translateY(-8px); box-shadow: 0 15px 40px rgba(108, 92, 231, 0.15); }
+.card-img-container { position: relative; height: 280px; overflow: hidden; cursor: pointer; }
+.card-img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s; }
+.art-card:hover .card-img { transform: scale(1.05); }
+.card-body { padding: 20px; }
+.card-title { font-family: 'Prompt'; font-weight: 600; margin: 0 0 5px 0; }
+.card-price { font-family: 'Prompt'; font-weight: 700; color: var(--accent); font-size: 18px; margin-top: 10px; }
+
+/* ================= BADGES & ACTIONS ================= */
+.category-badge { position: absolute; top: 10px; left: 10px; padding: 4px 12px; background: rgba(0,0,0,0.6); color: white; font-size: 10px; border-radius: 20px; backdrop-filter: blur(4px); z-index: 2; }
+.sold-overlay-badge { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-15deg); border: 4px solid var(--danger); color: var(--danger); font-size: 32px; font-weight: 800; padding: 10px 20px; background: rgba(0,0,0,0.8); z-index: 5; pointer-events: none; text-transform: uppercase; font-family: 'Prompt'; }
+.art-card.sold .card-img { filter: grayscale(100%); opacity: 0.5; }
+
+.action-btn-group { position: absolute; top: 10px; right: 10px; display: flex; gap: 8px; z-index: 10; opacity: 0; transition: 0.3s; }
+.art-card:hover .action-btn-group { opacity: 1; }
+.action-btn { width: 35px; height: 35px; border-radius: 50%; border: none; display: flex; justify-content: center; align-items: center; cursor: pointer; color: white; }
+.btn-delete { background: var(--danger); }
+.btn-edit { background: var(--warning); color: #333; }
+
+/* ================= MODALS ================= */
+.modal {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.85); z-index: 6000; display: none;
+    justify-content: center; align-items: center; backdrop-filter: blur(8px);
+}
+.modal.open { display: flex; }
+.modal-box { background: #25252b; width: 450px; padding: 40px; border-radius: 24px; text-align: center; position: relative; border: 1px solid rgba(255,255,255,0.1); color: white; }
+.close-modal { position: absolute; top: 20px; right: 20px; font-size: 20px; cursor: pointer; color: #666; }
+.close-modal:hover { color: white; }
+.form-control { width: 100%; padding: 12px; border: 1px solid #444; border-radius: 12px; margin-bottom: 15px; background: #1a1a1f; color: white; font-family: 'Sarabun'; box-sizing: border-box; }
+.buy-btn { width: 100%; padding: 14px; background: var(--gradient-btn); color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; font-family: 'Prompt'; margin-top: 15px; }
+
+/* ================= PREVIEW & MISC ================= */
+.preview-box { background: #25252b; border-radius: 20px; overflow: hidden; max-width: 900px; width: 100%; display: flex; position: relative; }
+.preview-img { flex: 1.5; background: #000; display: flex; align-items: center; justify-content: center; }
+.preview-img img { max-width: 100%; max-height: 500px; object-fit: contain; }
+.preview-info { flex: 1; padding: 40px; display: flex; flex-direction: column; justify-content: center; color: white; }
+.btn-download { background: var(--download); color: white; display: flex; justify-content: center; align-items: center; margin-top: 10px; padding: 14px; border-radius: 12px; font-weight: bold; font-family: 'Prompt'; cursor: pointer; text-decoration: none; }
+
+.filters { display: flex; justify-content: center; gap: 15px; margin-bottom: 40px; }
+.filter-btn { padding: 10px 25px; border-radius: 30px; border: 1px solid #333; background: var(--card-bg); color: var(--text-muted); font-family: 'Prompt'; cursor: pointer; }
+.filter-btn.active, .filter-btn:hover { background: var(--text-main); color: #000; }
+
+.reset-btn-float { position: fixed; bottom: 20px; right: 20px; background: var(--danger); color: white; border: none; padding: 12px 20px; border-radius: 50px; cursor: pointer; z-index: 7000; font-family: 'Prompt'; font-weight: bold; }
+.card-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); opacity: 0; transition: 0.3s; display: flex; justify-content: center; align-items: center; }
+.card-img-container:hover .card-overlay { opacity: 1; }
+.view-btn { background: white; color: black; padding: 10px 20px; border-radius: 30px; font-weight: bold; font-size: 14px; }
+.studio-tabs { display: flex; gap: 15px; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+.studio-tab { cursor: pointer; font-family: 'Prompt'; font-weight: bold; color: #666; }
+.studio-tab.active { color: var(--accent); border-bottom: 3px solid var(--accent); }
+.delete-account-btn { color: var(--danger); font-size: 11px; cursor: pointer; margin-top: 5px; border: 1px solid var(--danger); padding: 2px 8px; border-radius: 4px; display: inline-block; }
+.link-text { color: var(--accent); cursor: pointer; font-weight: bold; }
+.admin-user-row { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #333; color: #ccc; }
+
+@media (max-width: 768px) {
+    .preview-box { flex-direction: column; }
+    .preview-img img { max-height: 300px; }
+    .hero h1 { font-size: 40px; }
+}
