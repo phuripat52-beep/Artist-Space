@@ -9,14 +9,10 @@
 </head>
 <body>
 
-<div id="intro-overlay">...</div>
-
-    <div id="main-site">
-        <nav>...</nav>
-        <div class="hero">...</div>
-        </div>
-
-    <script src="..."></script>
+    <div id="intro-overlay">
+        <canvas id="animCanvas"></canvas>
+        <div class="skip-hint">กด Spacebar เพื่อเข้าสู่เว็บไซต์</div>
+    </div>
 
     <button id="admin-reset-btn" class="reset-btn-float hidden" onclick="systemReset()">
         <i class="fas fa-sync-alt"></i> รีเซ็ตระบบ
@@ -187,8 +183,6 @@
 
             <div class="gallery-grid reveal-element" id="gallery"></div>
         </div>
-    </div>
-
-    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    </div> <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>
