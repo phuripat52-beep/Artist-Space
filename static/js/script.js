@@ -63,24 +63,32 @@ function enterSite() {
     if (isEntered) return;
     isEntered = true;
     
-    // 1. สั่ง CSS: เลื่อน Intro ขึ้นไปข้างบน (เปิดม่าน)
+    // 1. สั่ง Intro ให้เลื่อนขึ้น
     const intro = document.getElementById('intro-overlay');
     intro.classList.add('slide-up');
 
-    // 2. สั่ง CSS: โชว์หน้าเว็บหลัก (ยาแรง! บังคับค่าตรงๆ ไม่รอ Class)
+    // 2. สั่ง Main Site ให้แสดงผล
     const mainSite = document.getElementById('main-site');
-    mainSite.style.opacity = '1';              // บังคับความชัด
-    mainSite.style.visibility = 'visible';     // บังคับการมองเห็น
-    mainSite.style.height = 'auto';            // บังคับความสูง
-    mainSite.style.overflowY = 'auto';         // บังคับให้เลื่อนได้
+    mainSite.style.opacity = '1';
+    mainSite.style.visibility = 'visible';
+    mainSite.style.height = 'auto';
+    mainSite.style.overflowY = 'auto';
     
     // 3. คืนค่า Scroll ให้ Body
     document.body.style.overflowY = 'auto';
 
-    // 4. หยุด Animation ของ Intro
+    // 4. หยุด Animation
     if (typeof animId !== 'undefined') cancelAnimationFrame(animId);
 
-    // 5. ซ่อน Intro ถาวร (หลังจากเลื่อนขึ้นไปเสร็จ 1.5 วิ)
+    // 👇👇 5. ส่วนที่หายไป! สั่งให้เนื้อหา (Hero, รูปภาพ) ลอยขึ้นมาโชว์ 👇👇
+    document.querySelectorAll('.reveal-element').forEach((el, index) => {
+        setTimeout(() => { 
+            el.classList.add('reveal-active'); 
+        }, 100 + (index * 100)); // ให้มันค่อยๆ โผล่มาทีละนิด
+    });
+    // -------------------------------------------------------------
+
+    // 6. ซ่อน Intro ถาวร
     setTimeout(() => {
         intro.style.display = 'none';
     }, 1500);
