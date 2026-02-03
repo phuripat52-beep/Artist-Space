@@ -62,22 +62,27 @@ function animate() {
 function enterSite() {
     if (isEntered) return;
     isEntered = true;
-    phase = 'finished';
+    
+    // 1. สั่ง CSS: เลื่อน Intro ขึ้นไปข้างบน (เปิดม่าน)
+    const intro = document.getElementById('intro-overlay');
+    intro.classList.add('slide-up');
 
-    // 1. หยุด Animation
+    // 2. สั่ง CSS: โชว์หน้าเว็บหลัก (ยาแรง! บังคับค่าตรงๆ ไม่รอ Class)
+    const mainSite = document.getElementById('main-site');
+    mainSite.style.opacity = '1';              // บังคับความชัด
+    mainSite.style.visibility = 'visible';     // บังคับการมองเห็น
+    mainSite.style.height = 'auto';            // บังคับความสูง
+    mainSite.style.overflowY = 'auto';         // บังคับให้เลื่อนได้
+    
+    // 3. คืนค่า Scroll ให้ Body
+    document.body.style.overflowY = 'auto';
+
+    // 4. หยุด Animation ของ Intro
     if (typeof animId !== 'undefined') cancelAnimationFrame(animId);
 
-    // 2. จำค่าว่าดูแล้ว
-    sessionStorage.setItem('introShown', 'true');
-
-    // 3. สั่ง CSS ให้เลื่อน Intro ขึ้น และโชว์หน้าเว็บ
-    introOverlay.classList.add('slide-up');
-    mainSite.classList.add('show-content');
-    document.body.style.overflowY = 'auto'; // ปลดล็อก Scroll
-
-    // 4. ซ่อน Overlay ถาวรเมื่ออนิเมชั่นจบ
+    // 5. ซ่อน Intro ถาวร (หลังจากเลื่อนขึ้นไปเสร็จ 1.5 วิ)
     setTimeout(() => {
-        introOverlay.style.display = 'none';
+        intro.style.display = 'none';
     }, 1500);
 }
 
